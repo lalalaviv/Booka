@@ -10,10 +10,7 @@
     "install": "cd server && npm i && cd ../client && npm i",
     "build": "cd client && npm run build"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@work.github.com:lalala.viv/booka.git"
-  },
+  
   "keywords": [],
   "author": "",
   "license": "ISC",
