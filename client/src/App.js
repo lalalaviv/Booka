@@ -29,13 +29,6 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-mongoose.connect(
-  process.env.MONGODB_URI || 'mongodb://localhost:27017/your-database-name',
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-);
 
 // execute the `authLink` middleware prior to making the request to our GraphQL API
 const client = new ApolloClient({
