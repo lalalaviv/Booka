@@ -1,25 +1,23 @@
-import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
-import Auth from '../utils/auth';
-
-// import appolo hook and add user mutation
+import React, { useState } from "react";
+import { Form, Button, Alert } from "react-bootstrap";
 import { useMutation } from "@apollo/react-hooks";
+
+import Auth from "../utils/auth";
 import { ADD_USER } from "../utils/mutations";
 
 const SignupForm = () => {
   // set initial form state
   const [userFormData, setUserFormData] = useState({
-     username: '', 
-     email: '', 
-     password: '' 
-    });
+    username: "",
+    email: "",
+    password: "",
+  });
   // set state for form validation
   const [validated] = useState(false);
   // set state for alert
   const [showAlert, setShowAlert] = useState(false);
 
- // declared the addUser with the useMutation
- const [addUser, { error }] = useMutation(ADD_USER);
+  const [addUser, { error }] = useMutation(ADD_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -36,15 +34,15 @@ const SignupForm = () => {
       event.stopPropagation();
     }
 
-    // use addUser function
     try {
       const { data } = await addUser({
         variables: { ...userFormData },
       });
 
       Auth.login(data.addUser.token);
-    } catch (e) {
-      console.error(e);
+
+    } catch (err) {
+      console.error(err);
       setShowAlert(true);
     }
 
@@ -127,6 +125,7 @@ const SignupForm = () => {
           Submit
         </Button>
       </Form>
+      {error && <div>Login failed</div>}
     </>
   );
 };

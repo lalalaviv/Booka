@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Jumbotron, Container, Col, Form, Button, Card, CardColumns } from 'react-bootstrap';
-
-import Auth from '../utils/auth';
-import { saveBook, searchGoogleBooks } from '../utils/API';
-import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
-
-// import Apollo hook and mutation
-import { SAVE_BOOK } from "../utils/mutations";
+import React, { useState, useEffect } from "react";
+import {
+  Jumbotron,
+  Container,
+  Col,
+  Form,
+  Button,
+  Card,
+  CardColumns,
+} from "react-bootstrap";
 import { useMutation } from "@apollo/react-hooks";
+
+import Auth from "../utils/auth";
+import { searchGoogleBooks } from "../utils/API";
+import { saveBookIds, getSavedBookIds } from "../utils/localStorage";
+import { SAVE_BOOK } from "../utils/mutations";
 
 const SearchBooks = () => {
   // create state for holding returned google api data
@@ -16,14 +22,14 @@ const SearchBooks = () => {
   const [searchInput, setSearchInput] = useState("");
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+
+  const [saveBook] = useMutation(SAVE_BOOK);
+
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
   });
-
-  // use the SAVE_BOOK mutation
-  const [saveBook] = useMutation(SAVE_BOOK);
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event) => {
@@ -34,9 +40,7 @@ const SearchBooks = () => {
     }
 
     try {
-      const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${searchInput}`
-      );
+      const response = await searchGoogleBooks(searchInput);
 
       if (!response.ok) {
         throw new Error("something went wrong!");
@@ -49,6 +53,7 @@ const SearchBooks = () => {
         authors: book.volumeInfo.authors || ["No author to display"],
         title: book.volumeInfo.title,
         description: book.volumeInfo.description,
+        link: book.volumeInfo.infoLink,
         image: book.volumeInfo.imageLinks?.thumbnail || "",
       }));
 
@@ -72,15 +77,9 @@ const SearchBooks = () => {
     }
 
     try {
-      const response = await saveBook({
-        variables: {
-          input: bookToSave,
-        },
+      await saveBook({
+        variables: { input: bookToSave },
       });
-
-      if (!response) {
-        throw new Error("something went wrong!");
-      }
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
@@ -136,6 +135,12 @@ const SearchBooks = () => {
                 <Card.Body>
                   <Card.Title>{book.title}</Card.Title>
                   <p className="small">Authors: {book.authors}</p>
+                  <p className="small">
+                    Link:{" "}
+                    <a href={book.link} target="_blank" rel="noreferrer">
+                      {book.title}
+                    </a>
+                  </p>
                   <Card.Text>{book.description}</Card.Text>
                   {Auth.loggedIn() && (
                     <Button
